@@ -21,7 +21,7 @@ def soma():
     if a is None or b is None:
         return jsonify({"erro": "Parâmetros 'a' e 'b' são obrigatórios."}), 400
     
-    resultado = a + b
+    resultado = a - b
     return jsonify({"resultado": resultado})
 
 if __name__ == '__main__':
