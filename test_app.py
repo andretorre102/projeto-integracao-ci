@@ -1,5 +1,6 @@
+import os
 import pytest
-from app import app
+from app import app 
 
 # Cria um cliente de teste falso para não precisarmos subir o servidor real
 @pytest.fixture
@@ -25,3 +26,22 @@ def test_soma(client):
     assert resposta.status_code == 200
     dados = resposta.get_json()
     assert dados['resultado'] == 15
+
+# Estudio Guiado 2
+# Teste 1: Garantir que a rota /api/desconto retorna 403 quando a flag estiver desativada
+def test_desconto_desativado(client, monkeypatch):
+    import app as app_module
+    monkeypatch.setattr(app_module, 'FEATURE_DESCONTO_PROMO', False)
+    resposta = client.get('/api/desconto?valor=100&porcentagem=15')
+    assert resposta.status_code == 403
+    dados = resposta.get_json()
+    assert dados['flag_status'] is False
+
+# Teste 2: Garantir que a rota /api/desconto retorna 200 quando a flag estiver ativada
+def test_desconto_ativado(client, monkeypatch):
+    import app as app_module
+    monkeypatch.setattr(app_module, 'FEATURE_DESCONTO_PROMO', True)
+    resposta = client.get('/api/desconto?valor=100&porcentagem=15')
+    assert resposta.status_code == 200
+    dados = resposta.get_json()
+    assert dados['valor_final'] == 85.0

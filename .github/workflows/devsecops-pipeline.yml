@@ -1,0 +1,99 @@
+name: Esteira DevSecOps (Validação e Segurança)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  VERSAO_PYTHON: "3.9"
+  NOME_VERSAO: "1.0.0"
+  ENV_NAME: "producao"
+
+jobs:
+  # JOB 1: Testes funcionais e qualidade de código    
+  lint-and-test:
+    name: 1. Qualidade e testes funcionais
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código fonte (Checkout)
+        uses: actions/checkout@v3
+
+      - name: Configurar Python ${{ env.VERSAO_PYTHON }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.VERSAO_PYTHON }}
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint com Flake8
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Executar testes unitarios
+        run: |
+          pytest -v
+
+  # JOB 2: Varredura de segurança (DevSecOps Quality Gates)
+  security-scan:
+    name: 2. Escaneamento de seguranca (SAST, SCA & Secrets)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código fonte (Checkout)
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Mantém o histórico do Git necessário para o TruffleHog
+
+      - name: Configurar Python $ {{ env.VERSAO_PYTHON }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.VERSAO_PYTHON }}
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Varredura de segredos
+      - name: Secret Scanning (TruffleHog)
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
+
+      # Análise Estática de Segurança (SAST)
+      - name: SAST - Análise Estática com Bandit
+        run: |
+          bandit -r . -ll -ii
+
+      # Análise de Composição de Software (SCA)
+      - name: SCA - Análise de dependências com pip-audit
+        run: |
+          pip-audit -r requirements.txt
+
+  # JOB 3: Build local e Scan de vulnerabilidades da imagem
+  docker-build-and-scan:
+    name: 3. Build Docker e Scan Trivy
+    needs: [lint-and-test, security-scan]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código fonte (Checkout)
+        uses: actions/checkout@v3
+
+      - name: Build da imagem Docker local
+        run: |
+          docker build -t app:test .
+        
+      - name: Escaneamento de vulnerabilidades da Imagem (Trivy)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'app:test'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'

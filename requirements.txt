@@ -2,3 +2,6 @@ Flask
 werkzeug
 pytest-flask
 pytest
+# Novos
+bandit
+pip-audit

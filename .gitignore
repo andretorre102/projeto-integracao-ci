@@ -1,4 +1,5 @@
 venv/
 __pycache__/
 .pytest_cache/
-Estudo Guiado 01.md
+*.md
+relatorio-trivy.txt
