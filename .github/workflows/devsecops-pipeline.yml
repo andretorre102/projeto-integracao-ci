@@ -74,7 +74,7 @@ jobs:
         run: |
           pip-audit -r requirements.txt
 
-  # JOB 3: Build local e Scan de vulnerabilidades da imagem
+  # JOB 3: Build local e Scan de vulnerabilidades da imagem com Trivy
   docker-build-and-scan:
     name: 3. Build Docker e Scan Trivy
     needs: [lint-and-test, security-scan]
