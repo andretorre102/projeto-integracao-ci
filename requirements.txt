@@ -1,7 +1,7 @@
 Flask
+flake8
 werkzeug
 pytest-flask
 pytest
-# Novos
 bandit
 pip-audit
