@@ -7,7 +7,7 @@ on:
     branches: ["main"]
 
 env:
-  VERSAO_PYTHON: "3.12"
+  VERSAO_PYTHON: "3.9"
   NOME_VERSAO: "1.0.0"
   ENV_NAME: "producao"
 
@@ -48,7 +48,7 @@ jobs:
         with:
           fetch-depth: 0 # Mantém o histórico do Git necessário para o TruffleHog
 
-      - name: Configurar Python $ {{ env.VERSAO_PYTHON }}
+      - name: Configurar Python ${{ env.VERSAO_PYTHON }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.VERSAO_PYTHON }}
