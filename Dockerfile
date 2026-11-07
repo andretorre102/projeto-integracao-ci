@@ -16,5 +16,8 @@ COPY . .
 # Expõe a porta 5000 para o mundo exterior
 EXPOSE 5000
 
+# Fazer a aplicação escutar em todas as interfaces dentro do container:
+ENV APP_HOST=0.0.0.0
+
 # Comando para rodar a aplicação quando o container iniciar
 CMD ["python", "app.py"]
